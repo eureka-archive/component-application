@@ -1,2 +1,3 @@
-# component-application
-PHP Application component (for Eureka Framework)
+# Application Component
+
+Entry point for all application in Eureka-Framework

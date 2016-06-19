@@ -55,17 +55,17 @@ class Application implements ApplicationInterface
             $action     = $this->route->getActionName();
 
             if (!class_exists($controller)) {
-                throw new \DomainException('Controller does not exists !');
+                throw new \DomainException('Controller does not exists! (controller: ' . $controller . ')');
             }
 
             $controller = new $controller($this->route);
 
             if (!($controller instanceof ControllerInterface)) {
-                throw new \LogicException('Controller does not implement Controller Interface !');
+                throw new \LogicException('Controller does not implement Controller Interface! (controller: ' . get_class($controller) . ')');
             }
 
             if (!method_exists($controller, $action)) {
-                throw new \DomainException('Action controller does not exists !');
+                throw new \DomainException('Action controller does not exists! (' . get_class($controller) . '::' . $action);
             }
 
         } catch (\DomainException $exception) {

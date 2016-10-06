@@ -14,8 +14,13 @@
 
   "autoload": {
     "psr-4": {
-      "Eureka\\Component\\Application\\": "./"
+      "Eureka\\Component\\Application\\": "./src/Application/"
     }
+  },
+
+  "require": {
+    "eureka/component-routing": "1.*",
+    "eureka/component-response": "1.*",
   }
 
 }

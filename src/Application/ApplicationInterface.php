@@ -15,7 +15,6 @@ use Eureka\Component\Routing\RouteInterface;
  * Application interface
  *
  * @author Romain Cottard
- * @version 2.1.0
  */
 interface ApplicationInterface
 {
@@ -29,8 +28,7 @@ interface ApplicationInterface
     /**
      * Run Application
      *
-     * @return   void
+     * @return void
      */
     public function run();
-
 }

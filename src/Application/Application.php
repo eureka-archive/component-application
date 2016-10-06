@@ -10,7 +10,6 @@
 namespace Eureka\Component\Application;
 
 use Eureka\Component\Controller\ControllerInterface;
-use Eureka\Component\Debug\Debug;
 use Eureka\Component\Routing\RouteInterface;
 use Eureka\Component\Response;
 
@@ -18,23 +17,18 @@ use Eureka\Component\Response;
  * Application class
  *
  * @author Romain Cottard
- * @version 2.1.0
  */
 class Application implements ApplicationInterface
 {
-
     /**
-     * Route object.
-     *
-     * @var RouteInterface $route
+     * @var RouteInterface $route Route object.
      */
     protected $route = null;
 
     /**
      * Application constructor.
      *
-     * @param RouteInterface $route
-     * @return Application
+     * @param  RouteInterface $route
      */
     public function __construct(RouteInterface $route)
     {
@@ -44,8 +38,8 @@ class Application implements ApplicationInterface
     /**
      * Run application based on the route.
      *
-     * @return   string
-     * @throws   \Exception
+     * @return void
+     * @throws \Exception
      */
     public function run()
     {
@@ -67,12 +61,13 @@ class Application implements ApplicationInterface
             if (!method_exists($controller, $action)) {
                 throw new \DomainException('Action controller does not exists! (' . get_class($controller) . '::' . $action);
             }
-
         } catch (\DomainException $exception) {
             $this->handleException($exception, 404);
+
             return;
         } catch (\Exception $exception) {
             $this->handleException($exception, 500);
+
             return;
         }
 
@@ -87,7 +82,6 @@ class Application implements ApplicationInterface
             }
 
             $response->send();
-
         } catch (\Exception $exception) {
             $controller->handleException($exception);
         }
@@ -97,13 +91,13 @@ class Application implements ApplicationInterface
      * Handle exception
      *
      * @param \Exception $exception
-     * @param  int $httpCode
+     * @param  int       $httpCode
      * @return void
      * @throws \Exception
      */
     protected function handleException(\Exception $exception, $httpCode)
     {
-        $isAjax  = !empty($_SERVER['HTTP_X_REQUESTED_WITH']);
+        $isAjax = !empty($_SERVER['HTTP_X_REQUESTED_WITH']);
 
         if ($isAjax) {
             $sEngine = Response\Factory::ENGINE_API;
@@ -112,7 +106,7 @@ class Application implements ApplicationInterface
         } else {
             $sEngine = Response\Factory::ENGINE_NONE;
             $sFormat = Response\Factory::FORMAT_HTML;
-            $content = '<b>Exception[' . $exception->getCode(). ']: ' . $exception->getMessage() . '</b>
+            $content = '<b>Exception[' . $exception->getCode() . ']: ' . $exception->getMessage() . '</b>
             <pre>' . $exception->getTraceAsString() . '</pre>';
         }
 

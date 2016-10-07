@@ -20,7 +20,7 @@
 
   "require": {
     "eureka/component-routing": "1.*",
-    "eureka/component-response": "1.*",
+    "eureka/component-response": "1.*"
   }
 
 }

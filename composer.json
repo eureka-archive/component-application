@@ -19,12 +19,11 @@
   },
 
   "require": {
-    "eureka/component-config": "^2.0.0",
-    "eureka/component-container": "^1.0.0",
-    "eureka/component-http": "^1.1.0",
-    "eureka/component-routing": "^1.0.0",
-    "eureka/component-response": "^1.0.0",
-    "eureka/middleware-static": "^1.0.0"
+    "eureka/component-config": "^1.1",
+    "eureka/component-container": "^1.0",
+    "eureka/component-http": "^1.2",
+    "eureka/component-routing": "^1.2",
+    "eureka/component-response": "^1.0"
 
   }
 

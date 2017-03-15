@@ -24,7 +24,7 @@
     "eureka/component-http": "^1.1.0",
     "eureka/component-routing": "^1.0.0",
     "eureka/component-response": "^1.0.0",
-    "eureka/middleware-static": "^1.0.0",
+    "eureka/middleware-static": "^1.0.0"
 
   }
 

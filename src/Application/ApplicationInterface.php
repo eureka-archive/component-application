@@ -19,13 +19,6 @@ use Eureka\Component\Routing\RouteInterface;
 interface ApplicationInterface
 {
     /**
-     * ApplicationInterface constructor.
-     *
-     * @param RouteInterface $route
-     */
-    public function __construct(RouteInterface $route);
-
-    /**
      * Run Application
      *
      * @return void

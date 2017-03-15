@@ -58,9 +58,6 @@ class Application implements ApplicationInterface
                 throw new \LogicException('Controller does not implement Controller Interface! (controller: ' . get_class($controller) . ')');
             }
 
-            if (!method_exists($controller, $action)) {
-                throw new \DomainException('Action controller does not exists! (' . get_class($controller) . '::' . $action);
-            }
         } catch (\DomainException $exception) {
             $this->handleException($exception, 404);
 
@@ -72,6 +69,10 @@ class Application implements ApplicationInterface
         }
 
         try {
+
+            if (!method_exists($controller, $action)) {
+                throw new \DomainException('Action controller does not exists! (' . get_class($controller) . '::' . $action);
+            }
 
             $controller->runBefore();
             $response = $controller->$action();

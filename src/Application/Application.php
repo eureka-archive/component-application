@@ -9,111 +9,85 @@
 
 namespace Eureka\Component\Application;
 
-use Eureka\Component\Controller\ControllerInterface;
-use Eureka\Component\Routing\RouteInterface;
-use Eureka\Component\Response;
+use Eureka\Component\Container\Container;
+use Eureka\Component\Http\Message as HttpMessage;
+use Eureka\Component\Http\Middleware as HttpMiddleware;
 
 /**
  * Application class
  *
  * @author Romain Cottard
  */
-class Application implements ApplicationInterface
+class Application
 {
     /**
-     * @var RouteInterface $route Route object.
+     * @var HttpMiddleware\MiddlewareInterface[] $middleware
      */
-    protected $route = null;
-
-    /**
-     * Application constructor.
-     *
-     * @param  RouteInterface $route
-     */
-    public function __construct(RouteInterface $route)
-    {
-        $this->route = $route;
-    }
+    protected $middleware = [];
 
     /**
      * Run application based on the route.
      *
-     * @return void
+     * @return ResponseInterface
      * @throws \Exception
      */
     public function run()
     {
-        try {
+        $this->loadConfigPackages();
+        $this->loadMiddleware();
 
-            $controller = $this->route->getControllerName();
-            $action     = $this->route->getActionName();
+        //~ Default response
+        $response = new HttpMessage\Response();
 
-            if (!class_exists($controller)) {
-                throw new \DomainException('Controller does not exists! (controller: ' . $controller . ')');
-            }
+        //~ Get response
+        $stack    = new HttpMiddleware\Stack($response, $this->middleware);
+        $response = $stack->process(HttpMessage\ServerRequest::createFromGlobal());
 
-            $controller = new $controller($this->route);
+        //~ Send response
+        (new HttpMessage\ResponseSender($response))->send();
+    }
 
-            if (!($controller instanceof ControllerInterface)) {
-                throw new \LogicException('Controller does not implement Controller Interface! (controller: ' . get_class($controller) . ')');
-            }
+    /**
+     * Load configs from packages.
+     *
+     * @return void
+     */
+    private function loadConfigPackages()
+    {
+        $config = Container::getInstance()->get('config');
+        $list   = $config->get('global.package');
 
-        } catch (\DomainException $exception) {
-            $this->handleException($exception, 404);
-
-            return;
-        } catch (\Exception $exception) {
-            $this->handleException($exception, 500);
-
+        if (empty($list) || !is_array($list)) {
             return;
         }
 
-        try {
-
-            if (!method_exists($controller, $action)) {
-                throw new \DomainException('Action controller does not exists! (' . get_class($controller) . '::' . $action);
+        foreach ($list as $name => $data) {
+            if (!isset($data['config'])) {
+                continue;
             }
 
-            $controller->runBefore();
-            $response = $controller->$action();
-            $controller->runAfter();
-
-            if (!($response instanceof Response\ResponseInterface)) {
-                throw new \Exception('Controller does not return a template object !');
-            }
-
-            $response->send();
-        } catch (\Exception $exception) {
-            $controller->handleException($exception);
+            $config->loadYamlFromDirectory($data['config']);
         }
     }
 
     /**
-     * Handle exception
+     * Load middlewares
      *
-     * @param \Exception $exception
-     * @param  int       $httpCode
      * @return void
-     * @throws \Exception
      */
-    protected function handleException(\Exception $exception, $httpCode)
+    private function loadMiddleware()
     {
-        $isAjax = !empty($_SERVER['HTTP_X_REQUESTED_WITH']);
+        $this->middleware = [];
 
-        if ($isAjax) {
-            $sEngine = Response\Factory::ENGINE_API;
-            $sFormat = Response\Factory::FORMAT_JSON;
-            $content = json_encode($exception->getTraceAsString());
-        } else {
-            $sEngine = Response\Factory::ENGINE_NONE;
-            $sFormat = Response\Factory::FORMAT_HTML;
-            $content = '<b>Exception[' . $exception->getCode() . ']: ' . $exception->getMessage() . '</b>
-            <pre>' . $exception->getTraceAsString() . '</pre>';
+        $config = Container::getInstance()->get('config');
+        $list   = $config->get('global.middleware');
+
+        foreach ($list as $name => $conf) {
+            $services = $conf['services'];
+            foreach ($services as $service) {
+                // todo
+            }
+            $this->middleware[] = new $conf['class']($config);
         }
-
-        $response = Response\Factory::create($sFormat, $sEngine);
-        $response->setHttpCode($httpCode)
-            ->setContent($content)
-            ->send();
     }
 }

@@ -44,7 +44,6 @@ class ApplicationStatic implements ApplicationInterface
 
         //~ Default response
         $response = new HttpMessage\Response();
-        //$response->getBody()->write('-- static --');
 
         //~ Get response
         $stack    = new HttpMiddleware\Stack($response, $this->middleware);

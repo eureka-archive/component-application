@@ -1,7 +1,7 @@
 <?php
 
-/**
- * Copyright (c) 2010-2017 Romain Cottard
+/*
+ * Copyright (c) Romain Cottard
  *
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
@@ -9,7 +9,9 @@
 
 namespace Eureka\Component\Application;
 
+use Eureka\Component\Config\Config;
 use Eureka\Component\Container\Container;
+use Eureka\Middleware;
 use Eureka\Component\Http\Message as HttpMessage;
 use Eureka\Component\Http\Middleware as HttpMiddleware;
 
@@ -18,12 +20,13 @@ use Eureka\Component\Http\Middleware as HttpMiddleware;
  *
  * @author Romain Cottard
  */
-class Application
+class ApplicationStatic implements ApplicationInterface
 {
-    /**
-     * @var HttpMiddleware\MiddlewareInterface[] $middleware
-     */
+    /** @var HttpMiddleware\MiddlewareInterface[] $middleware */
     protected $middleware = [];
+
+    /** @var string $type Static content type. */
+    protected $type = '';
 
     /**
      * Run application based on the route.
@@ -33,7 +36,6 @@ class Application
      */
     public function run()
     {
-        $this->loadConfigPackages();
         $this->loadMiddleware();
 
         //~ Default response
@@ -48,46 +50,35 @@ class Application
     }
 
     /**
-     * Load configs from packages.
-     *
-     * @return void
-     */
-    private function loadConfigPackages()
-    {
-        $config = Container::getInstance()->get('config');
-        $list   = $config->get('global.package');
-
-        if (empty($list) || !is_array($list)) {
-            return;
-        }
-
-        foreach ($list as $name => $data) {
-            if (!isset($data['config'])) {
-                continue;
-            }
-
-            $config->loadYamlFromDirectory($data['config']);
-        }
-    }
-
-    /**
      * Load middlewares
      *
      * @return void
      */
     private function loadMiddleware()
     {
-        $this->middleware = [];
-
         $config = Container::getInstance()->get('config');
-        $list   = $config->get('global.middleware');
 
-        foreach ($list as $name => $conf) {
-            $services = $conf['services'];
-            foreach ($services as $service) {
-                // todo
-            }
-            $this->middleware[] = new $conf['class']($config);
+        $this->middleware[] = new Middleware\ExceptionMiddleware\ExceptionMiddleware($config);
+
+        //~ Request
+        $request = HttpMessage\ServerRequest::createFromGlobal();
+        $query   = $request->getQueryParams();
+
+        $this->type = $query['type'];
+
+        switch ($this->type) {
+            case 'css':
+                $this->middleware[] = new Middleware\StaticMiddleware\CssMiddleware($config);
+                break;
+            case 'js':
+                $this->middleware[] = new Middleware\StaticMiddleware\JsMiddleware($config);
+                break;
+            case 'image':
+                $this->middleware[] = new Middleware\StaticMiddleware\ImageMiddleware($config);
+                break;
+            case 'font':
+                $this->middleware[] = new Middleware\StaticMiddleware\FontMiddleware($config);
+                break;
         }
     }
 }

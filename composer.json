@@ -21,10 +21,11 @@
   "require": {
     "eureka/component-config": "^1.1",
     "eureka/component-container": "^1.0",
-    "eureka/component-controller": "^1.1",
     "eureka/component-http": "^1.2",
     "eureka/component-routing": "^1.2",
-    "eureka/component-response": "^1.0"
+    "eureka/component-response": "^1.0",
+
+    "eureka/component-controller": "^2.0"
 
   }
 
